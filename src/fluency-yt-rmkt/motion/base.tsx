@@ -15,7 +15,7 @@ export const SANS = loadSans("normal", { weights: ["400", "600", "700"], subsets
 export const COR = { ink: "#0B0D12", ink2: "#475467", azul: "#2F5BFF", verde: "#0E9F4F", vermelho: "#E5383B", gelo: "#FAFBFD", linha: "#D9DEE8" };
 export const FPS = 30;
 // velocidade da parte do YouTube (13/11 Marcos: "já pode acelerar 10%"); a oferta da VSL fica em 1×
-export const VEL = 1.17;
+export const VEL = 1.14;
 export const durTrecho = (t: { de: number; ate: number }) => Math.round(((t.ate - t.de) / VEL) * FPS);
 // PALCO = área da edição (em cima). O apresentador fica num cartão embaixo (ver FluencyYtRmkt).
 export const PALCO = { w: 1080, h: 1130, pad: 72 };
