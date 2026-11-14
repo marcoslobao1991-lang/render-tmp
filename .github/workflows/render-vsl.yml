@@ -245,6 +245,7 @@ jobs:
             -map "[v]" -map "$N:a" \
             -fps_mode passthrough -frames:v "$ESPERADO" \
             -c:v libx264 -preset medium -crf 18 -pix_fmt yuv420p \
+            -af "volume=7.5dB,alimiter=limit=0.9:level=false" \
             -c:a aac -b:a 192k \
             -video_track_timescale 30000 -movflags +faststart \
             "$COMP.mp4"
