@@ -104,7 +104,7 @@ export const FluencyYtRmkt: React.FC<Props> = ({ modo, faixa, semVideo, semAudio
 	let perto = false;
 	const seqs = trechos.map((t, i) => {
 		if (i > 0 && Math.abs(t.de - trechos[i - 1].ate) > 0.05) perto = !perto;
-		const zoom = perto ? 1.07 : 1;
+		const zoom = 1; // 14/11 (Marcos): SEM zoom na emenda ("ficou horrível, deixa sem")
 		const dur = durTrecho(t), from = ac;
 		if (frame >= from && frame < from + dur) tOrig = t.de + ((frame - from) / fps) * VEL;
 		ac += dur;
