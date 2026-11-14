@@ -132,7 +132,7 @@ const C913: React.FC = () => {
 };
 
 // 960-982 · imagina: 100% de todas as temporadas + shadowing
-const C960: React.FC = () => {
+export const C960: React.FC = () => {
 	const f = useCurrentFrame(); const t0 = fr(975) - 20; const p = ap(f, t0, 50);
 	return (
 		<>

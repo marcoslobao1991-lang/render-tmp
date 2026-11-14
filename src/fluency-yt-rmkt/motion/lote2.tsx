@@ -122,7 +122,7 @@ const Lapida: React.FC<{ de: number; ate: number; apoio?: [number, React.ReactNo
 		</>
 	);
 };
-const C148: React.FC = () => <Lapida de={fw(148, "lapidação")} ate={fr(159)} apoio={[fr(158), <>Só ouvir não basta. <b style={{ color: COR.ink }}>Por isso existe a repetição</b></>]} />;
+export const C148: React.FC = () => <Lapida de={fw(148, "lapidação")} ate={fr(159)} apoio={[fr(158), <>Só ouvir não basta. <b style={{ color: COR.ink }}>Por isso existe a repetição</b></>]} />;
 const C176: React.FC = () => <Lapida de={fr(176) - 600} ate={fr(176)} apoio={[fw(177, "mais"), "Quanto mais você escuta, mais o ouvido fica treinado"]} fim={[fr(179), "“Peguei.”"]} />;
 
 // 160-168 · BRUCE LEE: 10 mil chutes diferentes × o MESMO chute 10 mil vezes

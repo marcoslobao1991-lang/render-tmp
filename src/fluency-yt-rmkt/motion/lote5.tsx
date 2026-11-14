@@ -14,7 +14,7 @@ const MEIO: React.CSSProperties = { display: "flex", alignItems: "center", justi
 const AZUL_CHEIO: React.CSSProperties = { background: COR.azul, boxShadow: "0 26px 70px rgba(47,91,255,0.35)" };
 
 // 456-487 · 100 quadradinhos = o vocabulário; UM acende = 1%. Embaixo o cartão ENCHE até 90% = o tempo de conversa.
-const C456: React.FC = () => {
+export const C456: React.FC = () => {
 	const f = useCurrentFrame(); const tA = fr(461), tB = fr(462) + 30, t1 = fr(465); const um = ap(f, t1, 12), enche = ap(f, tB, 24);
 	return (
 		<>

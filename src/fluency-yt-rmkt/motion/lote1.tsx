@@ -23,7 +23,7 @@ const Titulo: React.FC<{ apoio: [number, string] }> = ({ apoio }) => (
 	</>
 );
 // 1-10 · abertura
-const C01: React.FC = () => <Titulo apoio={[fw(1, "ninguém"), "As coisas que ninguém fala pra você"]} />;
+export const C01: React.FC = () => <Titulo apoio={[fw(1, "ninguém"), "As coisas que ninguém fala pra você"]} />;
 
 // 15-23 · PONTO: traduzir na cabeça. Desenho: inglês → português → ideia (bolinha lenta). "Fluência vem da velocidade": caminho direto.
 const No: React.FC<{ x: number; y: number; t: string; em: number; cor?: string; apagado?: boolean }> = ({ x, y, t, em, cor = COR.ink, apagado }) => (
