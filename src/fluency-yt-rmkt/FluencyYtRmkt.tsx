@@ -13,6 +13,7 @@ import { LOTE3 } from "./motion/lote3";
 import { LOTE4 } from "./motion/lote4";
 import { LOTE5 } from "./motion/lote5";
 import { LOTE7 } from "./motion/lote7";
+import { LOTE8 } from "./motion/lote8";
 import { Oferta } from "./motion/oferta";
 
 // semVideo (13/11, Marcos: "tira o vídeo meu por enquanto pra eu conseguir dar play"): sem decodificar vídeo; toca só o áudio já cortado
@@ -67,7 +68,7 @@ const Abre: React.FC<{ de: number }> = ({ de }) => {
 	let it: [number, React.ReactNode] | null = null; for (const x of a.itens) if (f >= fr(x[0])) it = x; if (!it) it = a.itens[0];
 	return <div key={it[0]} style={{ position: "absolute", left: 40, right: 40, top: 170, height: 880, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center" }}><FraseG size={150} style={{ lineHeight: 1.02 }}>{it[1]}</FraseG></div>;
 };
-const CENAS: Cena[] = [...LOTE1, ...LOTE2, ...LOTE3, ...LOTE4, ...LOTE5, ...LOTE7];
+const CENAS: Cena[] = [...LOTE1, ...LOTE2, ...LOTE3, ...LOTE4, ...LOTE5, ...LOTE7, ...LOTE8];
 const FIM_CENAS = 99999; // as cenas cobrem a aula inteira
 export const cenaEm = (frame: number): Cena | null => {
 	if (FIM_CENAS < 9999 && frame >= fr(FIM_CENAS)) return null;
