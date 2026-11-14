@@ -15,10 +15,11 @@ import { LOTE5 } from "./motion/lote5";
 import { LOTE7 } from "./motion/lote7";
 import { LOTE8 } from "./motion/lote8";
 import { Oferta } from "./motion/oferta";
+import { DIGITA } from "./digita";
 
 // semVideo (13/11, Marcos: "tira o vídeo meu por enquanto pra eu conseguir dar play"): sem decodificar vídeo; toca só o áudio já cortado
 // (public/fluency-yt-rmkt-aula.m4a, gerado por audio-aula.mjs: RODAR DE NOVO sempre que os cortes ou a velocidade mudarem).
-export type Props = { modo: "roteiro" | "tudo"; faixa: boolean; semVideo?: boolean; semAudio?: boolean; src?: string; audioAula?: string; audioOferta?: string };
+export type Props = { modo: "roteiro" | "tudo"; faixa: boolean; semVideo?: boolean; semAudio?: boolean; digita?: boolean; src?: string; audioAula?: string; audioOferta?: string };
 export const FLUENCY_YT_RMKT_DEFAULTS: Props = { modo: "roteiro", faixa: true, semVideo: true, semAudio: false };
 const FPS = 30, FIM = 3073.4;
 const OFERTA_S = 532.06; // public/fluency-yt-rmkt-oferta.mp4 = VSL no ar a partir de 17:34,28 ("E não só isso, mas hoje a Fluency Route conta...")
@@ -92,7 +93,13 @@ const Tarja: React.FC<{ tOrig: number }> = ({ tOrig }) => {
 	);
 };
 
-export const FluencyYtRmkt: React.FC<Props> = ({ modo, faixa, semVideo, semAudio, src, audioAula, audioOferta }) => {
+// DIGITAÇÃO (14/11, versão FULL INTEGRAL, Marcos: "sem alterar nem a parte da digitação na tela"): enquanto ele digita no docs,
+// a LINHA REAL que ele está escrevendo (recorte do próprio vídeo, não recriação) aparece numa faixa no topo do cartão dele.
+// Fica 1,2 s depois da última tecla pra dar tempo de ler. DOC = recorte do proxy (coluna do texto x 262–1030), ampliado 1,18×.
+const DOC = { x: 262, w: 768, k: 1.2 };
+const digitaEm = (t: number) => { let d: [number, number, number, number] | null = null; for (const x of DIGITA) { if (x[0] - 0.3 > t) break; if (t <= x[1] + 1.2) d = x; } return d; };
+
+export const FluencyYtRmkt: React.FC<Props> = ({ modo, faixa, semVideo, semAudio, digita, src, audioAula, audioOferta }) => {
 	const VIDEO = src || staticFile("fluency-yt-rmkt-proxy.mp4");
 	const frame = useCurrentFrame();
 	const { fps } = useVideoConfig();
@@ -111,6 +118,8 @@ export const FluencyYtRmkt: React.FC<Props> = ({ modo, faixa, semVideo, semAudio
 		// só monta o trecho atual e os vizinhos (centenas de vídeos montados juntos travam o Studio)
 		if (semVideo || frame < from - 45 || frame > from + dur + 45) return null;
 		const ini = Math.round(t.de * fps);
+		const dg = digita && frame >= from && frame < from + dur ? digitaEm(tOrig) : null;
+		const dgP = dg ? Math.min(1, Math.max(0, (tOrig - (dg[0] - 0.3)) / 0.2)) : 0;
 		return (
 			<Sequence key={i} from={from} durationInFrames={dur} premountFor={30}>
 				{/* palco: docs original (referência) só onde ainda não há cena; sem som */}
@@ -124,6 +133,13 @@ export const FluencyYtRmkt: React.FC<Props> = ({ modo, faixa, semVideo, semAudio
 				<div style={{ position: "absolute", left: CARTAO.x, top: CARTAO.y, width: CARTAO.w, height: CARTAO.h, borderRadius: CARTAO.r, overflow: "hidden", boxShadow: "0 24px 60px rgba(11,13,18,0.18)" }}>
 					<OffthreadVideo playbackRate={VEL} src={VIDEO} startFrom={ini} style={{ position: "absolute", left: 0, top: -987, width: 960, height: 1707, transform: `scale(${zoom})`, transformOrigin: `${0.62 * 960}px ${987 + 0.3 * 684}px` }} />
 				</div>
+				{dg ? (
+					<div style={{ position: "absolute", left: CARTAO.x + (CARTAO.w - DOC.w * DOC.k) / 2, top: CARTAO.y + 16 - (1 - dgP) * 14, width: DOC.w * DOC.k, height: dg[3] * DOC.k, borderRadius: 22, overflow: "hidden", background: "#fff", boxShadow: "0 14px 36px rgba(11,13,18,0.28)", opacity: dgP }}>
+						<div style={{ position: "absolute", left: -DOC.x * DOC.k, top: -(dg[2] - dg[3] / 2) * DOC.k, width: 1080, height: 1920, transform: `scale(${DOC.k})`, transformOrigin: "0 0" }}>
+							<OffthreadVideo muted playbackRate={VEL} src={VIDEO} startFrom={ini} style={{ position: "absolute", left: 0, top: 0, width: 1080, height: 1920 }} />
+						</div>
+					</div>
+				) : null}
 			</Sequence>
 		);
 	});
