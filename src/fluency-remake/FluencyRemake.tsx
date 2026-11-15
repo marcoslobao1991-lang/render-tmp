@@ -8,21 +8,24 @@
 // Cortes secos, sem deslizar nem fade. De 17:34 em diante entra a OFERTA (mesmo áudio da fluency-yt-rmkt).
 import React from "react";
 import { AbsoluteFill, Audio, OffthreadVideo, Sequence, staticFile, useCurrentFrame, CalculateMetadataFunction } from "remotion";
-import { COR, DISPLAY, Fundo, s } from "./motion/base";
+import { COR, SANS, Fundo, s } from "./motion/base";
 import { ELE } from "./ele";
 import { ROTEIRO, Trecho } from "./roteiro";
+import { WORDS } from "./words";
 import { Oferta } from "../fluency-yt-rmkt/motion/oferta";
 
 export type Props = { semVideo?: boolean; semAudio?: boolean; src?: string; audio?: string; broll?: string }; // broll = pasta dos b-rolls por URL (render fora da máquina)
 export const FLUENCY_REMAKE_DEFAULTS: Props = { semVideo: false, semAudio: false };
 const TOTAL_S = 1586.34, OFERTA_DE = 1054.28;
+// a 1ª cena da oferta só tem o que mostrar 2,2 s depois ("centenas de alunos"); até lá ele segue na tela (está limpo no original), sem tela vazia
+const OFERTA_VIS = OFERTA_DE + 2.2;
 export const FLUENCY_REMAKE_FRAMES = Math.round(TOTAL_S * 30);
 export const calculateFluencyRemake: CalculateMetadataFunction<Props> = () => ({ durationInFrames: FLUENCY_REMAKE_FRAMES });
 
 const ZONA = 812; // altura da zona do desenho; embaixo dela ficam 1108 px pra ele (cabeça + peito) ou pro b-roll
 export const trechoEm = (frame: number): Trecho | null => { let c: Trecho | null = null; for (const x of ROTEIRO) if (frame >= s(x.de)) c = x; return c; };
 // janelas (em frames) em que ELE existe no original. O mapa foi medido a 5 fps (erra a borda em até 0,2 s): 9 quadros de folga de cada lado.
-const JANELAS: [number, number][] = ELE.filter(([a]) => a < OFERTA_DE).map(([a, b]) => [s(a) + 9, b >= OFERTA_DE ? s(OFERTA_DE) : s(b) - 9] as [number, number]).filter(([a, b]) => b - a >= 60);
+const JANELAS: [number, number][] = ELE.filter(([a]) => a < OFERTA_DE).map(([a, b]) => [s(a) + 9, b >= OFERTA_DE ? s(OFERTA_VIS) : s(b) - 9] as [number, number]).filter(([a, b]) => b - a >= 60);
 // o original tem ele de 0 a 0,5 s (a 1ª janela de ele.ts só começa em 3,4 s): a abertura entra à parte
 const ABRE_ATE = 12; // o original tem ele limpo até o quadro 13; no 14 já entra o borrão da transição antiga
 // BURACOS: dentro das janelas, trechos em que a edição antiga pôs título amarelo/cartão POR CIMA dele (work/fluency-copia/_tit.mjs, 10 fps). Ali ele não entra: vai a lousa do conceito.
@@ -50,19 +53,34 @@ const Broll: React.FC<{ item: [number, number, string, number, number?]; caixa?:
 		</Sequence>
 	);
 };
-// FAIXA: a frase-guia do ponto. Mesma posição em todas as telas (e cobre a legenda queimada do original, y ≈ 1450–1600).
-const Faixa: React.FC<{ de: number; children: React.ReactNode }> = ({ de, children }) => {
-	const f = useCurrentFrame(); const p = Math.min(1, Math.max(0, (f - de) / 6));
+// LEGENDA: acompanha a fala, palavra por palavra do áudio (words.ts), no estilo e no lugar da legenda queimada do original.
+// 15/11, Marcos: "você fez uma legenda que não acompanha o que eu tô falando, só marca 1 ponto como se fosse slide… é a legenda que é pra aparecer".
+// Com ele em tela cheia vale a legenda ORIGINAL do vídeo (nada por cima). Esta entra só onde a original não aparece: desenho + ele, e b-roll.
+type Bloco = { de: number; fim: number; t: string; n: number; fecha: boolean };
+const BLOCOS: Bloco[] = (() => {
+	const out: Bloco[] = []; let cur: Bloco | null = null; let inicioDeFrase = true;
+	for (const [p, a, b] of WORDS) {
+		let limpa = p.replace(/[.,!?;:"“”…]/g, ""); if (!limpa) continue; if (limpa === "Road") limpa = "Route"; // o Whisper ouve "Fluency Road"
+		if (inicioDeFrase) limpa = limpa.charAt(0).toLowerCase() + limpa.slice(1);
+		if (!cur || cur.fecha || cur.n >= 11 || a - cur.fim > 0.6 || b - cur.de > 3.5 || (cur.t + " " + limpa).length > 56) { cur = { de: a, fim: b, t: limpa, n: 1, fecha: false }; out.push(cur); } else { cur.t += " " + limpa; cur.fim = b; cur.n++; }
+		cur.fecha = /[.!?]$/.test(p); inicioDeFrase = cur.fecha;
+	}
+	return out;
+})();
+const Legenda: React.FC = () => {
+	const t = useCurrentFrame() / 30; let b: Bloco | undefined;
+	for (let k = 0; k < BLOCOS.length; k++) { if (BLOCOS[k].de > t) break; b = BLOCOS[k]; if (BLOCOS[k + 1] && BLOCOS[k + 1].de <= t) continue; }
+	if (!b || t > b.fim + 0.45) return null;
 	return (
-		<div style={{ position: "absolute", left: 40, right: 40, top: 1436, height: 290, borderRadius: 44, background: "#fff", boxShadow: "0 24px 60px rgba(11,13,18,0.30)", display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "0 44px", boxSizing: "border-box" }}>
-			<div style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 74, lineHeight: 1.03, letterSpacing: -2.5, color: COR.ink, opacity: 0.35 + 0.65 * p }}>{children}</div>
+		<div style={{ position: "absolute", left: 60, right: 60, top: 1500, transform: "translateY(-50%)", display: "flex", justifyContent: "center" }}>
+			<div style={{ background: "rgba(0,0,0,0.55)", padding: "14px 30px", fontFamily: SANS, fontWeight: 400, fontSize: 42, lineHeight: 1.3, color: "#fff", textAlign: "center", maxWidth: 900, textWrap: "balance" as any }}>{b.t}</div>
 		</div>
 	);
 };
 
 // o que a tela mostra em cada quadro (uma coisa só): ele · lousa · b-roll (com ou sem desenho em cima)
 export const telaEm = (frame: number) => {
-	const naOferta = frame >= s(OFERTA_DE);
+	const naOferta = frame >= s(OFERTA_VIS);
 	const t = naOferta ? null : trechoEm(frame);
 	const ele = !naOferta && (frame < ABRE_ATE || JANELAS.some(([a, b]) => frame >= a && frame < b)) && !BURACOS.some(([a, b]) => frame >= a && frame < b);
 	const br = !ele && !naOferta ? brollEm(frame) : undefined;
@@ -81,14 +99,15 @@ export const FluencyRemake: React.FC<Props> = ({ semVideo, semAudio, src, audio,
 			{Slide ? <Slide /> : null}
 			{br && !Slide && !semVideo ? <div style={{ ...baixo, background: "#0B0D12" }}><Broll key={br[0]} item={br} base={broll} caixa={Desenho ? 1436 - ZONA : undefined} /></div> : null}
 			{/* ELE: um vídeo só (o quadro cheio do original), sempre montado até a oferta; só muda a moldura. Embaixo do desenho aparece cabeça + peito. */}
-			{!semVideo && frame < s(OFERTA_DE) + 5 ? (
+			{!semVideo && frame < s(OFERTA_VIS) ? (
 				<div style={{ ...baixo, visibility: ele ? "visible" : "hidden" }}>
 					<OffthreadVideo muted src={src || staticFile("fluency-remake/ele-cheio.mp4")} style={{ position: "absolute", left: 0, top: 0, width: 1080, height: 1920 }} />
 				</div>
 			) : null}
-			{t && !Slide ? <><div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 700, background: "linear-gradient(to bottom, rgba(11,13,18,0), rgba(11,13,18,0.5))" }} /><Faixa de={s(t.de)}>{t.ponto}</Faixa></> : null}
+			{/* 15/11, Marcos: "na parte que sou eu falando deixa a legenda original que já existe". Ele em tela cheia = vídeo puro, sem faixa. */}
+			{t && !Slide && !(ele && !Desenho) ? <Legenda /> : null}
 			{!semAudio ? <Audio src={audio || staticFile("fluency-remake/audio.m4a")} /> : null}
-			{naOferta ? <Sequence from={s(OFERTA_DE)}><Oferta /></Sequence> : null}
+			{naOferta ? <Sequence from={s(OFERTA_DE)}><Oferta seco /></Sequence> : null}
 		</AbsoluteFill>
 	);
 };

@@ -92,24 +92,21 @@ export const Habilidade: React.FC = () => {
 };
 
 // 9:55 e 10:08 · a calculadora de palavras de Friends
-const EPS = [0.86, 0.66, 0.94, 0.72, 0.87, 0.89, 0.81, 0.93, 0.9, 0.68];
 export const Calculo: React.FC = () => {
 	const f = useCurrentFrame();
 	const tN = w(598.5, 599.2, "números"), tB = s(607.9), t100 = w(613, 614, "100") - 6;
 	const ps = [["you", w(608.9, 609.5, "you")], ["that", w(609.4, 609.9, "that")], ["me", w(609.9, 610.3, "me")], ["I", w(610.2, 610.7, "I")], ["who", w(610.6, 611.1, "who")], ["what", w(611, 611.5, "what")], ["how", w(611.5, 612.1, "how")]] as [string, number][];
-	if (f < tB) return (
-		<Lousa>
-			<Titulo size={92}>Calculadora de palavras</Titulo>
-			<div style={{ borderRadius: 40, border: "3px solid rgba(255,255,255,0.16)", background: "rgba(255,255,255,0.07)", padding: "44px 40px 34px" }}>
-				<div style={{ fontFamily: SANS, fontWeight: 700, fontSize: 46, color: "rgba(255,255,255,0.86)", marginBottom: 30 }}>Friends · 1 temporada inteira</div>
-				<div style={{ height: 560, display: "flex", alignItems: "flex-end", gap: 16, borderBottom: "4px solid rgba(255,255,255,0.35)" }}>
-					{EPS.map((h, i) => <div key={i} style={{ flex: 1, height: `${h * 100 * ap(f, tN + i * 3, 12)}%`, background: i % 2 ? "#4D74FF" : COR.azul, borderRadius: "14px 14px 0 0" }} />)}
-				</div>
-				<div style={{ display: "flex", gap: 16, marginTop: 14 }}>{EPS.map((_, i) => <div key={i} style={{ flex: 1, textAlign: "center", fontFamily: SANS, fontWeight: 700, fontSize: 36, color: "rgba(255,255,255,0.75)" }}>{i + 1}</div>)}</div>
-				<div style={{ fontFamily: SANS, fontWeight: 600, fontSize: 42, color: "rgba(255,255,255,0.86)", textAlign: "center", marginTop: 22 }}>palavras diferentes em cada episódio</div>
-			</div>
-		</Lousa>
-	);
+	// 1ª parte: UM número só. Conta enquanto ele fala "os números que você está vendo" e crava em 800 na palavra.
+	if (f < tB) {
+		const t8 = s(603.2), n = Math.round(800 * Math.min(1, Math.max(0, (f - tN) / Math.max(1, t8 - tN))) ** 0.7);
+		return (
+			<Lousa>
+				<Titulo size={92}>Calculadora de palavras</Titulo>
+				<div style={{ fontFamily: SANS, fontWeight: 700, fontSize: 50, color: "rgba(255,255,255,0.8)", textAlign: "center", visibility: f < tN ? "hidden" : "visible" }}>Friends · 1 temporada inteira</div>
+				<div style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 380, letterSpacing: -14, lineHeight: 1, color: "#fff", textAlign: "center", marginTop: 40, fontVariantNumeric: "tabular-nums", visibility: f < tN ? "hidden" : "visible" }}>{n}</div>
+			</Lousa>
+		);
+	}
 	return (
 		<Lousa>
 			<Titulo size={92}>As palavras que mais aparecem</Titulo>
@@ -142,19 +139,19 @@ export const Subconsciente: React.FC = () => {
 // 11:50 e 12:16 · os 2 tipos de repetição
 export const Repeticao: React.FC = () => {
 	const f = useCurrentFrame();
-	const tT = w(707, 708, "dois") - 4, t1 = w(710.8, 711.3, "repetição"), s1 = w(713.5, 714.2, "repete"), t2 = w(737, 737.6, "repetição"), s2 = w(739.9, 740.4, "revê"), d2 = w(741, 741.5, "depois");
+	const tT = w(707, 708, "dois") - 4, t1 = w(710.8, 711.3, "repetição"), s1 = w(713.5, 714.2, "repete"), t2 = w(737, 737.6, "repetição"), d2 = w(741, 741.5, "depois");
 	const v = vez(f, [[t1, 0], [t2, 1]]);
 	const n1 = Math.max(0, Math.min(8, Math.floor((f - w(714.2, 714.8, "várias")) / 6) + 1));
 	const dias = ["hoje", "+1 dia", "+3 dias", "+7 dias"];
 	return (
 		<Lousa>
 			<Titulo em={tT}>2 tipos de repetição</Titulo>
-			<Linha em={t1} acesa={v === 0} size={92} sub="a mesma coisa, várias vezes, na mesma hora" subEm={s1}
+			<Linha em={t1} acesa={v === 0} size={92}
 				extra={<div style={{ display: "flex", gap: 14, marginTop: 30, visibility: f < s1 ? "hidden" : "visible" }}>{[...Array(8)].map((_, i) => <div key={i} style={{ flex: 1, height: 26, borderRadius: 13, background: i < n1 ? "#fff" : "rgba(255,255,255,0.22)" }} />)}</div>}>
 				1 · Continuada
 			</Linha>
 			<div style={{ height: 34 }} />
-			<Linha em={t2} acesa={v === 1} size={92} sub="rever o treino depois de alguns dias" subEm={s2}
+			<Linha em={t2} acesa={v === 1} size={92}
 				extra={<div style={{ display: "flex", justifyContent: "space-between", marginTop: 30, visibility: f < d2 ? "hidden" : "visible" }}>{dias.map((d, i) => { const q = ap(f, d2 + i * 8, 7); return <div key={d} style={{ opacity: q, display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}><div style={{ width: 54, height: 54, borderRadius: 27, background: "#fff" }} /><div style={{ fontFamily: SANS, fontWeight: 700, fontSize: 38, color: "#fff" }}>{d}</div></div>; })}</div>}>
 				2 · Espaçada
 			</Linha>

@@ -131,12 +131,6 @@ const Botao: React.FC<{ em: number; y: number; children: React.ReactNode }> = ({
 };
 
 // ───────── 0:00 · centenas de alunos → O ÁUDIO DO ALUNO (prova) ─────────
-const fala: [number, React.ReactNode][] = [
-	[14.5, <>“Eu tava matriculado na escola de inglês aqui”</>], [17.5, <>“Eu moro nos Estados Unidos”</>], [21.1, <>“E você é culpado”</>],
-	[24.0, <>“Você fez eu <Azul>sair do curso</Azul>”</>], [45.0, <>“Vale a pena”</>], [46.1, <>“Minha esposa <Azul>também saiu</Azul> do curso”</>],
-	[49.8, <>“Ela viu que <Azul>dá resultado</Azul>”</>], [53.3, <>“Você ouve o discurso e <Azul>entende aquilo que não entendia</Azul>”</>], [58.7, <>“É muito prazeroso”</>],
-	[61.9, <>“Não tem como o cara <Azul>treinando</Azul> não acertar”</>], [65.4, <>“Pra mim tá dando certo. Pra minha esposa também”</>], [74.0, <>“Vou tocar pra cima no <Azul>Friends</Azul>”</>],
-];
 const Audio1: React.FC<{ y: number; em: number }> = ({ y, em }) => {
 	const f = useCurrentFrame(); const t = f / 30; const p = Math.max(0, Math.min(1, (t - ONDA_DE) / (ONDA_ATE - ONDA_DE))); const seg = Math.max(0, Math.min(ONDA_ATE - ONDA_DE, t - ONDA_DE));
 	const mm = (x: number) => `${Math.floor(x / 60)}:${String(Math.floor(x % 60)).padStart(2, "0")}`;
@@ -154,7 +148,9 @@ const Audio1: React.FC<{ y: number; em: number }> = ({ y, em }) => {
 };
 const O01: React.FC = () => {
 	const f = useCurrentFrame(); const tA = s(7.6);
-	let q: [number, React.ReactNode] | null = null; for (const x of fala) if (f >= s(x[0])) q = x;
+	// 15/11, Marcos: "na hora do depoimento… deixa só o áudio puro sem legenda nem nada, só parecendo um play mesmo. E coloca PROPRIEDADE FLUENCY ROUTE".
+	// Enquanto o áudio toca: só o cartão do aluno + o player, no meio da tela, e o selo de propriedade. As frases transcritas (fala) não aparecem mais.
+	const dy = f < s(77.3) ? 330 : 0;
 	return (
 		<>
 			<Pil>{f < tA ? "Fluency Route" : "O que um aluno me mandou"}</Pil>
@@ -166,15 +162,15 @@ const O01: React.FC = () => {
 				</>
 			) : (
 				<>
-					<Cartao y={280} h={170} em={tA} style={{ display: "flex", alignItems: "center", gap: 28, padding: "0 36px", boxSizing: "border-box" }}>
+					<Cartao y={280 + dy} h={170} em={tA} style={{ display: "flex", alignItems: "center", gap: 28, padding: "0 36px", boxSizing: "border-box" }}>
 						<div style={{ width: 104, height: 104, borderRadius: 99, background: "#E3E8F0", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><svg width={60} height={60} viewBox="0 0 60 60"><circle cx={30} cy={22} r={13} fill="#98A2B3" /><path d="M 6 58 C 6 40 54 40 54 58 Z" fill="#98A2B3" /></svg></div>
 						<div>
 							<div style={{ fontFamily: DISPLAY, fontWeight: 800, fontSize: 50, letterSpacing: -1.4, color: COR.ink }}>Aluno da Fluency Route</div>
 							{f >= s(10.7) ? <Entra em={s(10.7)}><div style={{ fontFamily: SANS, fontWeight: 600, fontSize: 36, color: COR.ink2, marginTop: 4 }}>mora nos EUA · fazia aula presencial lá</div></Entra> : null}
 						</div>
 					</Cartao>
-					<Audio1 y={480} em={tA + 6} />
-					{f < s(77.3) ? (q ? <Entra key={q[0]} em={s(q[0])} style={{ position: "absolute", left: 60, right: 60, top: 840, textAlign: "center" }}><Frase size={104} style={{ lineHeight: 1.06 }}>{q[1]}</Frase></Entra> : null) : (
+					<Audio1 y={480 + dy} em={tA + 6} />
+					{f < s(77.3) ? <div style={{ position: "absolute", left: 0, right: 0, top: 1120, textAlign: "center", fontFamily: SANS, fontWeight: 700, fontSize: 36, letterSpacing: 7, color: COR.ink2 }}>PROPRIEDADE FLUENCY ROUTE</div> : (
 						<>
 							<Centro top={840} em={s(77.3)}><Apoio size={60}>E esse é só um dos exemplos</Apoio></Centro>
 							<Cartao y={980} h={380} em={s(83.8)} style={{ ...AZUL_CHEIO, ...MEIO, padding: "0 40px", boxSizing: "border-box" }}><Frase size={104} c="#fff">Isso pode acontecer com você também</Frase></Cartao>
@@ -655,11 +651,11 @@ const O20: React.FC = () => (
 const CENAS: [number, React.FC][] = [[0, O01], [85.6, O02], [112.0, O03], [125.7, O04], [142.1, O05], [150.0, O06], [185.3, O07], [218.5, O08], [230.5, O09], [251.2, O10],
 	[259.6, O11], [298.4, O12], [316.0, O13], [333.1, O14], [361.2, O15], [411.2, O16], [421.9, O17], [441.2, O18], [498.0, O19], [518.5, O20]];
 // a oferta inteira (frames locais: 0 = primeira palavra do áudio da oferta). Entra subindo por cima da aula.
-export const Oferta: React.FC = () => {
+export const Oferta: React.FC<{ seco?: boolean }> = ({ seco }) => {
 	const f = useCurrentFrame(); let C: React.FC = O01; for (const [t, c] of CENAS) if (f >= s(t)) C = c;
 	const p = ap(f, 0, 12);
 	return (
-		<div style={{ position: "absolute", inset: 0, transform: `translateY(${(1 - p) * 1920}px)` }}>
+		<div style={{ position: "absolute", inset: 0, transform: seco ? undefined : `translateY(${(1 - p) * 1920}px)` }}>
 			<Fundo />
 			<div style={{ position: "absolute", inset: 0, transform: "translateY(60px)" }}><C /></div>
 		</div>

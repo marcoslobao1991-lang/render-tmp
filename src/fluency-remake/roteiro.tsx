@@ -56,7 +56,7 @@ export const ROTEIRO: Trecho[] = [
 	// ───── AULA 3 · fluência essencial
 	{ de: 574.5, ponto: <>Mais um conceito: <A>fluência essencial</A></>, S: L.CEssencial },
 	{ de: 582.4, ponto: <>500 palavras = <A>90%</A> do dia a dia</>, D: D.Quinhentas, broll: "friends" },
-	{ de: 596.05, ponto: <>Friends: <A>800 palavras</A> por episódio</>, D: D.Calculadora, S: L.Calculo, broll: "friends" },
+	{ de: 596.05, ponto: <>Friends: <A>800 palavras</A> por episódio</>, S: L.Calculo, broll: "friends" },
 	{ de: 615.65, ponto: <>Por que se <A>sobrecarregar</A> com o resto?</>, broll: "sala" },
 	{ de: 631.8, ponto: <>Tradicional: toda semana <A>um assunto novo</A></>, D: D.Semana, broll: "sala" },
 	{ de: 642.15, ponto: <>Aqui: toda a energia <A>no essencial</A></>, broll: "tv" },
